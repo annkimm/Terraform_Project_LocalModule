@@ -3,6 +3,11 @@ variable "instance_type" {
   type        = string
 }
 
+variable "desired_capacity" {
+  description = "ASG default Size"
+  type        = string
+}
+
 variable "min_size" {
   description = "ASG Min Size"
   type        = string
@@ -30,5 +35,20 @@ variable "SSH_SG_ID" {
 
 variable "HTTP_HTTPS_SG_ID" {
   description = "HTTP_HTTPS_SG_ID"
+  type        = string
+}
+
+variable "rds_instance_address" {
+  description = "rds_instance_address"
+  type        = string
+}
+
+variable "target_group_arns" {
+  description = "target_group_arns"
+  type        = string
+}
+
+variable "rds_port" {
+  description = "rds_port"
   type        = string
 }
