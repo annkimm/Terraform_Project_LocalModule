@@ -1,5 +1,4 @@
 resource "aws_launch_configuration" "aws_asg_launch" {
-  name            = "${var.name}-asg-launch"
   image_id        = "ami-0ea4d4b8dc1e46212"
   instance_type   = var.instance_type
   security_groups = [var.SSH_SG_ID, var.HTTP_HTTPS_SG_ID]
@@ -11,8 +10,7 @@ resource "aws_launch_configuration" "aws_asg_launch" {
     sudo yum -y install httpd.x86_64
     sudo systemctl start httpd.service
     sudo systemctl enable httpd.service
-    echo "DB Endpoint: ${var.rds_instance_address}" > /var/www/html/index.html
-    echo "DB Port: ${var.rds_port}" >> /var/www/html/index.html
+    echo "<h1>Hello My WEB</h1>" > /var/www/html/index.html
   EOF
 
   lifecycle {
@@ -21,7 +19,7 @@ resource "aws_launch_configuration" "aws_asg_launch" {
 }
 
 resource "aws_autoscaling_group" "aws_asg" {
-  name                 = "${var.name}-asg"
+  name                 = "${var.name}-${aws_launch_configuration.aws_asg_launch.name}"
   launch_configuration = aws_launch_configuration.aws_asg_launch.name
   min_size             = var.min_size
   max_size             = var.max_size
@@ -30,6 +28,13 @@ resource "aws_autoscaling_group" "aws_asg" {
 
   target_group_arns = [var.target_group_arns]
   health_check_type = "ELB"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  # 교체용 ASG 배포 완료를 고려하기 전 최소 인스턴스 수 만큼 상태검사를 통과할 때까지 대기 후 배포완료
+  min_elb_capacity  = var.min_size
 
   tag {
     key                 = "Name"
